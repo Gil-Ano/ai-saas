@@ -1,11 +1,15 @@
 const express = require("express");
 const router = express.Router();
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const { protect } = require("../middleware/authMiddleware");
 const User = require("../models/User");
 
 router.post("/create-checkout", protect, async (req, res) => {
   try {
+    const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+    console.log("STRIPE KEY:", process.env.STRIPE_SECRET_KEY?.slice(0, 20));
+    console.log("PRICE ID:", process.env.STRIPE_PRICE_ID);
+    console.log("FRONTEND URL:", process.env.FRONTEND_URL);
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "subscription",
@@ -22,6 +26,7 @@ router.post("/create-checkout", protect, async (req, res) => {
     });
     res.json({ url: session.url });
   } catch (err) {
+    console.log("STRIPE ERROR:", err.message);
     res.status(500).json({ message: err.message });
   }
 });
@@ -30,6 +35,7 @@ router.post(
   "/webhook",
   express.raw({ type: "application/json" }),
   async (req, res) => {
+    const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
     const sig = req.headers["stripe-signature"];
     let event;
     try {
