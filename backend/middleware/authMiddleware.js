@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+const prisma = require("../lib/prisma");
 
 const protect = async (req, res, next) => {
   let token;
@@ -10,7 +10,7 @@ const protect = async (req, res, next) => {
     try {
       token = req.headers.authorization.split(" ")[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = await User.findById(decoded.id).select("-password");
+      req.user = await prisma.user.findUnique({ where: { id: decoded.id } });
       next();
     } catch (err) {
       res.status(401).json({ message: "Not authorized, token failed" });
@@ -28,9 +28,11 @@ const checkLimit = async (req, res, next) => {
     const lastRequest = new Date(user.lastRequestDate).toDateString();
 
     if (today !== lastRequest) {
-      user.requestsUsedToday = 0;
-      user.lastRequestDate = new Date();
-      await user.save();
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { requestsUsedToday: 0, lastRequestDate: new Date() },
+      });
+      req.user.requestsUsedToday = 0;
     }
 
     if (user.plan === "free" && user.requestsUsedToday >= 5) {

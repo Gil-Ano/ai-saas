@@ -1,10 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const { protect, checkLimit } = require("../middleware/authMiddleware");
-const User = require("../models/User");
-const RequestLog = require("../models/RequestLog");
+const prisma = require("../lib/prisma");
 
-const PYTHON_ENGINE = "http://localhost:8000";
+const PYTHON_ENGINE = process.env.PYTHON_ENGINE || "http://localhost:8000";
 
 const callPython = async (endpoint, data) => {
   const response = await fetch(`${PYTHON_ENGINE}/${endpoint}`, {
@@ -20,13 +19,12 @@ const callPython = async (endpoint, data) => {
 const logAndRespond = async (req, res, tool, endpoint, data) => {
   try {
     const result = await callPython(endpoint, data);
-    await User.findByIdAndUpdate(req.user._id, {
-      $inc: { requestsUsedToday: 1 },
+    await prisma.user.update({
+      where: { id: req.user.id },
+      data: { requestsUsedToday: { increment: 1 } },
     });
-    await RequestLog.create({
-      user: req.user._id,
-      tool,
-      response: result,
+    await prisma.requestLog.create({
+      data: { userId: req.user.id, tool, response: result },
     });
     res.json({ result });
   } catch (err) {
@@ -68,9 +66,11 @@ router.post("/code-explainer", protect, checkLimit, async (req, res) => {
 
 router.get("/history", protect, async (req, res) => {
   try {
-    const logs = await RequestLog.find({ user: req.user._id })
-      .sort({ createdAt: -1 })
-      .limit(20);
+    const logs = await prisma.requestLog.findMany({
+      where: { userId: req.user.id },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+    });
     res.json(logs);
   } catch (err) {
     res.status(500).json({ message: err.message });

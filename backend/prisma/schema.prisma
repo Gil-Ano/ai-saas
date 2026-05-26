@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                   String       @id @default(cuid())
+  name                 String
+  email                String       @unique
+  password             String
+  plan                 String       @default("free")
+  requestsUsedToday    Int          @default(0)
+  lastRequestDate      DateTime     @default(now())
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  apiKey               String?      @unique
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+  requests             RequestLog[]
+}
+
+model RequestLog {
+  id        String   @id @default(cuid())
+  userId    String
+  tool      String
+  prompt    String?
+  response  String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}

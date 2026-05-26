@@ -1,28 +1,20 @@
 const express = require("express");
 const router = express.Router();
 const { protect } = require("../middleware/authMiddleware");
-const User = require("../models/User");
+const prisma = require("../lib/prisma");
+const { sendUpgradeEmail } = require("../lib/email");
 
 router.post("/create-checkout", protect, async (req, res) => {
   try {
     const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
-    console.log("STRIPE KEY:", process.env.STRIPE_SECRET_KEY?.slice(0, 20));
-    console.log("PRICE ID:", process.env.STRIPE_PRICE_ID);
-    console.log("FRONTEND URL:", process.env.FRONTEND_URL);
-
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "subscription",
       customer_email: req.user.email,
-      line_items: [
-        {
-          price: process.env.STRIPE_PRICE_ID,
-          quantity: 1,
-        },
-      ],
+      line_items: [{ price: process.env.STRIPE_PRICE_ID, quantity: 1 }],
       success_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.FRONTEND_URL}/pricing`,
-      metadata: { userId: req.user._id.toString() },
+      metadata: { userId: req.user.id },
     });
     res.json({ url: session.url });
   } catch (err) {
@@ -50,19 +42,23 @@ router.post(
 
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
-      await User.findByIdAndUpdate(session.metadata.userId, {
-        plan: "pro",
-        stripeCustomerId: session.customer,
-        stripeSubscriptionId: session.subscription,
+      const user = await prisma.user.update({
+        where: { id: session.metadata.userId },
+        data: {
+          plan: "pro",
+          stripeCustomerId: session.customer,
+          stripeSubscriptionId: session.subscription,
+        },
       });
+      await sendUpgradeEmail(user.email, user.name);
     }
 
     if (event.type === "customer.subscription.deleted") {
       const subscription = event.data.object;
-      await User.findOneAndUpdate(
-        { stripeSubscriptionId: subscription.id },
-        { plan: "free" },
-      );
+      await prisma.user.updateMany({
+        where: { stripeSubscriptionId: subscription.id },
+        data: { plan: "free" },
+      });
     }
 
     res.json({ received: true });
