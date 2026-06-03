@@ -220,18 +220,23 @@ Docker Setup (Production)
 
 docker-compose up --build
 
-🚀 Deployment
-Service Platform URL
-Frontend Vercel https://clarixai.vercel.app
-API Gateway Render https://clarixai-api.onrender.com
-AI Microservice Render https://clarixai-ai.onrender.com
-Database Supabase (PgSQL) Cloud hosted
-Redis Upstash Cloud hosted
+## 🚀 Deployment
 
-💳 Stripe Integration
-Tier Price Requests
-Free $0/month 5/day
-Premium $9/month Unlimited
+| Service         | Platform         | URL                               |
+| --------------- | ---------------- | --------------------------------- |
+| Frontend        | Vercel           | https://clarixai.vercel.app       |
+| API Gateway     | Render           | https://clarixai-api.onrender.com |
+| AI Microservice | Render           | https://clarixai-ai.onrender.com  |
+| Database        | Supabase (PgSQL) | Cloud hosted                      |
+| Redis           | Upstash          | Cloud hosted                      |
+
+## 💳 Stripe Integration
+
+| Tier    | Price    | Requests  |
+| ------- | -------- | --------- |
+| Free    | $0/month | 5/day     |
+| Premium | $9/month | Unlimited |
+
 Webhook Events Handled:
 
 checkout.session.completed — Activate premium tier
@@ -243,18 +248,22 @@ invoice.payment_succeeded — Update subscription status
 Test with Stripe CLI:
 stripe listen --forward-to localhost:5000/api/sub/webhook
 
-🤖 AI Tools
-Tool Input Output
-Resume Analyzer CV + Job Description Match score, missing keywords, suggestions
-Cover Letter Resume + Job + Company Professional cover letter
-Interview Q&A Job Title + Level 10 technical + behavioral questions
-Content Rewriter Text + Tone Rewritten content
-Code Explainer Code snippet Line-by-line explanation
+## 🤖 AI Tools
 
-📊 Rate Limiting
-Tier Daily Limit Per Minute
-Free 5 requests 1 request
-Premium Unlimited 30 requests
+| Tool             | Input                  | Output                                     |
+| ---------------- | ---------------------- | ------------------------------------------ |
+| Resume Analyzer  | CV + Job Description   | Match score, missing keywords, suggestions |
+| Cover Letter     | Resume + Job + Company | Professional cover letter                  |
+| Interview Q&A    | Job Title + Level      | 10 technical + behavioral questions        |
+| Content Rewriter | Text + Tone            | Rewritten content                          |
+| Code Explainer   | Code snippet           | Line-by-line explanation                   |
+
+## 📊 Rate Limiting
+
+| Tier    | Daily Limit | Per Minute  |
+| ------- | ----------- | ----------- |
+| Free    | 5 requests  | 1 request   |
+| Premium | Unlimited   | 30 requests |
 
 🔮 Future Improvements
 
