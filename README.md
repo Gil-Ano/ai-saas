@@ -76,6 +76,7 @@
 
 ## 🏗️ Architecture
 
+```
 ┌─────────────────┐
 │ Frontend │
 │ (React SPA) │
@@ -101,6 +102,8 @@ HTTP/gRPC │ │ Prisma
 │ Groq Llama │
 │ 3 │
 └─────────────┘
+
+```
 
 ---
 
@@ -224,9 +227,8 @@ API Gateway Render https://clarixai-api.onrender.com
 AI Microservice Render https://clarixai-ai.onrender.com
 Database Supabase (PgSQL) Cloud hosted
 Redis Upstash Cloud hosted
-💳 Stripe Integration
-ClariX AI uses Stripe for subscription management:
 
+💳 Stripe Integration
 Tier Price Requests
 Free $0/month 5/day
 Premium $9/month Unlimited
@@ -241,21 +243,21 @@ invoice.payment_succeeded — Update subscription status
 Test with Stripe CLI:
 stripe listen --forward-to localhost:5000/api/sub/webhook
 
-🤖 AI Tools Deep Dive
-
+🤖 AI Tools
 Tool Input Output
-Resume Analyzer CV + Job Description Match score (0-100%), missing keywords, suggestions
-Cover Letter Generator Resume + Job Title + Company Professional cover letter
-Interview Generator Job Title + Experience Level 10 technical + behavioral questions
-Content Rewriter Text + Desired Tone Rewritten content (professional/casual/persuasive)
+Resume Analyzer CV + Job Description Match score, missing keywords, suggestions
+Cover Letter Resume + Job + Company Professional cover letter
+Interview Q&A Job Title + Level 10 technical + behavioral questions
+Content Rewriter Text + Tone Rewritten content
 Code Explainer Code snippet Line-by-line explanation
 
-📊 Rate Limiting Strategy
+📊 Rate Limiting
+Tier Daily Limit Per Minute
+Free 5 requests 1 request
+Premium Unlimited 30 requests
 
-Tier Requests/day Rate Limit (per minute)
-Free 5 1 request/minute
-Premium Unlimited 30 requests/minute
 🔮 Future Improvements
+
 Team/organization accounts
 
 Custom AI model fine-tuning
